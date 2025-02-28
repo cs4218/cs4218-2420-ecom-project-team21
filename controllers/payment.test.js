@@ -87,6 +87,27 @@ describe('braintreeTokenController', () => {
 
     expect(logSpy).toHaveBeenCalledWith(error);
   });
+
+  it('should handle empty token response gracefully', async () => {
+    gateway.clientToken.generate.mockImplementationOnce((_, callback) => {
+      callback(null, {});
+    });
+
+    await braintreeTokenController(request, response);
+
+    expect(response.status).toHaveBeenCalledWith(500);
+    expect(response.send).toHaveBeenCalledWith(new Error('Invalid token response'));
+  });
+
+  it('should not log sensitive information', async () => {
+    gateway.clientToken.generate.mockImplementationOnce((_, callback) => {
+      callback(null, token);
+    });
+
+    await braintreeTokenController(request, response);
+
+    expect(logSpy).not.toHaveBeenCalledWith(expect.stringMatching(/clientToken|token/i));
+  });
 });
 
 describe('brainTreePaymentController', () => {
@@ -107,7 +128,7 @@ describe('brainTreePaymentController', () => {
     orderModel.prototype.save.mockResolvedValue(txnSuccess);
   });
 
-  it('should make payment successfully', async () => {
+  it('should make payment successfully and create an order', async () => {
     gateway.transaction.sale.mockImplementationOnce((_, callback) => {
       callback(null, txnSuccess);
     });
@@ -115,9 +136,10 @@ describe('brainTreePaymentController', () => {
     await brainTreePaymentController(request, response);
 
     expect(response.json).toHaveBeenCalledWith({ ok: true });
+    expect(orderModel.prototype.save).toHaveBeenCalled();
   });
 
-  it('should handle payment failure with error response', async () => {
+  it('should not create order when payment fails', async () => {
     const error = new Error('Payment failed');
 
     gateway.transaction.sale.mockImplementationOnce((_, callback) => {
@@ -128,6 +150,7 @@ describe('brainTreePaymentController', () => {
 
     expect(response.status).toHaveBeenCalledWith(500);
     expect(response.send).toHaveBeenCalledWith(error);
+    expect(orderModel.prototype.save).not.toHaveBeenCalled();
   });
 
   it('should log error when sale() throws', async () => {
@@ -140,5 +163,33 @@ describe('brainTreePaymentController', () => {
 
     expect(logSpy).toHaveBeenCalledWith(error);
   });
-});
 
+  it('should handle empty cart with 400 status', async () => {
+    request.body.cart = [];
+
+    await brainTreePaymentController(request, response);
+
+    expect(response.status).toHaveBeenCalledWith(400);
+    expect(response.send).toHaveBeenCalledWith(new Error('Cart is empty'));
+  });
+
+  it('should handle unauthenticated user with 401 status', async () => {
+    delete request.user;
+
+    await brainTreePaymentController(request, response);
+
+    expect(response.status).toHaveBeenCalledWith(401);
+    expect(response.send).toHaveBeenCalledWith(new Error('User not authenticated'));
+  });
+
+  it('should prevent duplicate transactions', async () => {
+    gateway.transaction.sale.mockImplementationOnce((_, callback) => {
+      callback(null, txnSuccess);
+    });
+
+    await brainTreePaymentController(request, response);
+    await brainTreePaymentController(request, response);
+
+    expect(response.json).toHaveBeenCalledTimes(1);
+  });
+});
