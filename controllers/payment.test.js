@@ -10,20 +10,16 @@ const txnSuccess = { success: true };
 
 jest.mock('fs');
 jest.mock('../models/orderModel');
-jest.mock('slugify', () => {
-  return jest.fn().mockReturnValue('product');
-});
+jest.mock('slugify', () => jest.fn().mockReturnValue('product'));
 jest.mock('braintree', () => ({
-  BraintreeGateway: jest.fn(() => {
-    return {
-      clientToken: {
-        generate: jest.fn(),
-      },
-      transaction: {
-        sale: jest.fn(),
-      },
-    };
-  }),
+  BraintreeGateway: jest.fn(() => ({
+    clientToken: {
+      generate: jest.fn(),
+    },
+    transaction: {
+      sale: jest.fn(),
+    },
+  })),
   Environment: {
     Sandbox: 'sandbox',
   },
@@ -32,25 +28,30 @@ jest.mock('braintree', () => ({
 // Get the gateway object
 const gateway = braintree.BraintreeGateway.mock.results[0].value;
 
-// Define reusable mock response
+// Reusable mock response
 const createMockResponse = () => ({
   send: jest.fn(),
   status: jest.fn().mockReturnThis(),
   json: jest.fn(),
 });
 
+// Centralized setup for console.log spy
+let logSpy;
+beforeAll(() => {
+  logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+});
+
+afterAll(() => {
+  logSpy.mockRestore();
+});
+
 describe('braintreeTokenController', () => {
-  let request, response, logSpy;
+  let request, response;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     request = {};
-    response = createMockResponse(); // Use reusable response mock
-  });
-
-  afterAll(() => {
-    logSpy.mockRestore();
+    response = createMockResponse();
   });
 
   it('should obtain braintree controller token successfully', async () => {
@@ -76,9 +77,9 @@ describe('braintreeTokenController', () => {
     expect(response.send).toHaveBeenCalledWith(error);
   });
 
-  it('should log error when generate() fails', async () => {
+  it('should log error when generate() throws', async () => {
     const error = new Error('Error while getting token');
-    gateway.clientToken.generate.mockImplementationOnce((_, callback) => {
+    gateway.clientToken.generate.mockImplementationOnce(() => {
       throw error;
     });
 
@@ -89,26 +90,21 @@ describe('braintreeTokenController', () => {
 });
 
 describe('brainTreePaymentController', () => {
-  let request, response, logSpy;
+  let request, response;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     request = {
       body: {
         nonce: 'nonce',
-        cart: [mockedProductData],
+        cart: [{ _id: 'product1', price: 100 }],
       },
       user: {
         _id: '123',
       },
     };
-    response = createMockResponse(); // Use reusable response mock
+    response = createMockResponse();
     orderModel.prototype.save.mockResolvedValue(txnSuccess);
-  });
-
-  afterAll(() => {
-    logSpy.mockRestore();
   });
 
   it('should make payment successfully', async () => {
@@ -134,9 +130,9 @@ describe('brainTreePaymentController', () => {
     expect(response.send).toHaveBeenCalledWith(error);
   });
 
-  it('should log error when sale() fails', async () => {
+  it('should log error when sale() throws', async () => {
     const error = new Error('Payment failed');
-    gateway.transaction.sale.mockImplementationOnce((_, callback) => {
+    gateway.transaction.sale.mockImplementationOnce(() => {
       throw error;
     });
 
@@ -145,3 +141,4 @@ describe('brainTreePaymentController', () => {
     expect(logSpy).toHaveBeenCalledWith(error);
   });
 });
+
