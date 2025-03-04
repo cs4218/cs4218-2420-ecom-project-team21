@@ -347,6 +347,11 @@ export const brainTreePaymentController = async (req, res) => {
   try {
     const { nonce, cart } = req.body;
     let total = 0;
+
+    if (!cart || cart.length === 0) {
+      return res.status(400).send(new Error("Cart is empty"));
+    }
+
     cart.map((i) => {
       total += i.price;
     });
