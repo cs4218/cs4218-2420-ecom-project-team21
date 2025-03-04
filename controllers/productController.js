@@ -352,6 +352,11 @@ export const brainTreePaymentController = async (req, res) => {
       return res.status(400).send(new Error("Cart is empty"));
     }
 
+    // Check if user is authenticated
+    if (!req.user || !req.user._id) {
+      return res.status(401).send(new Error("User not authenticated"));
+    }
+
     cart.map((i) => {
       total += i.price;
     });

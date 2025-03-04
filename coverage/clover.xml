@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1741089977712" clover="3.2.0">
-  <project timestamp="1741089977712" name="All files">
+<coverage generated="1741097655906" clover="3.2.0">
+  <project timestamp="1741097655906" name="All files">
     <metrics statements="14" coveredstatements="0" conditionals="2" coveredconditionals="0" methods="2" coveredmethods="0" elements="18" coveredelements="0" complexity="0" loc="14" ncloc="14" packages="1" files="1" classes="1"/>
     <file name="authMiddleware.js" path="C:\Users\USER\OneDrive\Desktop\CS4218\forked_copy2\cs4218-2420-ecom-project-team21\middlewares\authMiddleware.js">
       <metrics statements="14" coveredstatements="0" conditionals="2" coveredconditionals="0" methods="2" coveredmethods="0"/>
