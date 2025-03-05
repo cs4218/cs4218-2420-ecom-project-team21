@@ -12,12 +12,18 @@ module.exports = {
     ],
   
     collectCoverage: true,
-    collectCoverageFrom: ["controllers/**"],
-    collectCoverageFrom: ["middlewares/**"],
+    collectCoverageFrom: [
+      "config/**/*.js",
+      "controllers/**/*.js",
+      "helpers/**/*.js",
+      "middlewares/**/*.js",
+      "models/**/*.js",
+    ],
+    coverageDirectory: "coverage/backend",
     coverageThreshold: {
       global: {
-        lines: 0,
-        functions: 0,
+        lines: 20,
+        functions: 20,
       },
     },
   };
