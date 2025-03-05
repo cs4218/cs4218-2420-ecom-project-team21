@@ -198,14 +198,12 @@ describe("Order Status Update and Tracking", () => {
             }
         ];
 
-        // Reusable mock functions for chaining mongoose methods
         const sortMock = jest.fn().mockResolvedValue(mockOrders);
         const secondPopulateMock = jest.fn().mockReturnValue({ sort: sortMock });
         const firstPopulateMock = jest.fn().mockReturnValue({
             populate: secondPopulateMock
         });
 
-        // Mock the find method with chained populate calls
         orderModel.find.mockReturnValue({
             populate: firstPopulateMock
         });
@@ -222,7 +220,6 @@ describe("Order Status Update and Tracking", () => {
     it('should handle errors gracefully when retrieving all orders', async () => {
         const mockError = new Error('Database Error');
 
-        // Mock the chain to reject with an error
         const sortMock = jest.fn().mockRejectedValue(mockError);
         const secondPopulateMock = jest.fn().mockReturnValue({ sort: sortMock });
         const firstPopulateMock = jest.fn().mockReturnValue({
