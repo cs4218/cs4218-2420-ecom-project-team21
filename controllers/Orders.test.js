@@ -121,48 +121,42 @@ describe("Order Status Update and Tracking", () => {
     });
   
     it("should return 404 if order not found", async () => {
-        // Ensure orderId is correctly set in params
         mockReq.params = { orderId: "123" };
         mockReq.body = { status: "Shipped" };
-      
-        // Mock findByIdAndUpdate to return null (order not found)
+
         orderModel.findByIdAndUpdate.mockResolvedValue(null);
       
         await orderStatusController(mockReq, mockRes);
-      
-        // Ensure findByIdAndUpdate was called with correct arguments
+
         expect(orderModel.findByIdAndUpdate).toHaveBeenCalledWith(
           "123",
           { status: "Shipped" },
           { new: true }
         );
-      
-        // Ensure status(404) was called
+
         expect(mockRes.status).toHaveBeenCalledWith(404);
-      
-        // Ensure the response contains the correct message
+
         expect(mockRes.send).toHaveBeenCalledWith({
           success: false,
           message: "Order not found"
         });
       });
-      
-  
     it("should handle errors during status update", async () => {
         const mockError = new Error("Database error");
-    
-        orderModel.findById.mockRejectedValue(mockError);
-    
+        
+        orderModel.findById.mockResolvedValue({ _id: "123", status: "Pending" }); // Order exists
+        orderModel.findByIdAndUpdate.mockRejectedValue(mockError); // Simulate DB error
+        
         await orderStatusController(mockReq, mockRes);
-    
+        
         expect(mockRes.status).toHaveBeenCalledWith(500);
         expect(mockRes.send).toHaveBeenCalledWith({
             success: false,
-            message: "Failed to update order status",
-            error: mockError
-      });
+            message: "Error While Updating Order",
+            error: mockError, // Make sure this matches the updated controller
+        });
     });
-  });
+});
 
 
   describe('getAllOrdersController unit tests', () => {

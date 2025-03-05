@@ -240,6 +240,7 @@ export const orderStatusController = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
+
     const orders = await orderModel.findByIdAndUpdate(
       orderId,
       { status },
@@ -247,7 +248,7 @@ export const orderStatusController = async (req, res) => {
     );
 
     if (!orders) {
-      return res.status(404).send({
+        res.status(404).send({
         success: false,
         message: "Order not found",
       });
