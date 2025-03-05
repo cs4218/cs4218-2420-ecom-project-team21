@@ -26,8 +26,8 @@ describe('Get Orders Unit test', () => {
             {
                 _id: '1',
                 products: [
-                    { name: 'Alpha Product', price: 100 },
-                    { name: 'Beta Product', price: 200 }
+                    { name: 'Product 1 ', price: 100 },
+                    { name: 'Product 2', price: 200 }
                 ],
                 buyer: {
                     name: 'Adriel'
@@ -61,7 +61,7 @@ describe('Get Orders Unit test', () => {
         expect(mockRes.status).toHaveBeenCalledWith(500);
         expect(mockRes.send).toHaveBeenCalledWith({
             success: false,
-            message: "Error WHile Geting Orders",
+            message: "Error While Getting Orders",
             error: simulatedError
         });
     });
