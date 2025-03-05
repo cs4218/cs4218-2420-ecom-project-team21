@@ -229,7 +229,7 @@ export const getAllOrdersController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error While Getting Orders",
+      message: "Error While Getting All Orders",
       error,
     });
   }
@@ -245,6 +245,14 @@ export const orderStatusController = async (req, res) => {
       { status },
       { new: true }
     );
+
+    if (!orders) {
+      return res.status(404).send({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
     res.json(orders);
   } catch (error) {
     console.log(error);
