@@ -55,14 +55,17 @@ describe('braintreeTokenController', () => {
   });
 
   it('should obtain braintree controller token successfully', async () => {
+    const token = { clientToken: "mocked-client-token" }; 
+
     gateway.clientToken.generate.mockImplementationOnce((_ , callback) => {
-      callback(null, token);
+      callback(null, token); // Return correct token format
     });
 
     await braintreeTokenController(request, response);
 
     expect(response.send).toHaveBeenCalledWith(token);
-  });
+});
+
 
   it('should handle error when token generation fails', async () => {
     const error = new Error('Error while getting token');
@@ -88,19 +91,19 @@ describe('braintreeTokenController', () => {
     expect(logSpy).toHaveBeenCalledWith(error);
   });
 
-  /*
+  
   it('should handle empty token response gracefully', async () => {
     gateway.clientToken.generate.mockImplementationOnce((_ , callback) => {
-      callback(null, {});
+      callback(null, {}); // Returning an empty object to simulate the issue
     });
-
+  
     await braintreeTokenController(request, response);
-    
-
-    expect(500).toHaveBeenCalledWith(response.status);
-    expect(response.send).toHaveBeenCalledWith(expect.any(Error));
+  
+    expect(response.status).toHaveBeenCalledWith(500);
+    expect(response.send).toHaveBeenCalledWith(expect.any(Object));
   });
-  */
+  
+  
   it('should not log sensitive information', async () => {
     gateway.clientToken.generate.mockImplementationOnce((_, callback) => {
       callback(null, token);
