@@ -202,6 +202,14 @@ export const updateProfileController = async (req, res) => {
 //orders
 export const getOrdersController = async (req, res) => {
   try {
+
+    if (!req.user) {
+      return res.status(401).send({
+        success: false,
+        message: "Unauthorized. Please login first.",
+      });
+    }
+    
     const orders = await orderModel
       .find({ buyer: req.user._id })
       .populate("products", "-photo")

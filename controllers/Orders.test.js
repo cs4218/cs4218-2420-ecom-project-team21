@@ -64,6 +64,16 @@ describe('Get Orders Unit test', () => {
             error: simulatedError
         });
     });
+    
+    it("should return 401 if user is not logged in", async () => {
+        mockReq.user = null;
+    
+        await getOrdersController(mockReq, mockRes);
+    
+        expect(mockRes.status).toHaveBeenCalledWith(401);
+        expect(mockRes.send).toHaveBeenCalledWith({ success: false, message: "Unauthorized. Please login first." });
+    });
+    
 
     it('should execute field population accurately', async () => {
         const secondaryPopulateMock = jest.fn().mockResolvedValue([]);
@@ -98,6 +108,21 @@ describe("Order Status Update and Tracking", () => {
         };
         jest.clearAllMocks();
     });
+
+    it("should update order status for valid status values", async () => {
+        const validStatuses = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
+    
+        for (const status of validStatuses) {
+            mockReq.body.status = status;
+            const mockUpdatedOrder = { _id: "123", status };
+    
+            orderModel.findByIdAndUpdate.mockResolvedValue(mockUpdatedOrder);
+            await orderStatusController(mockReq, mockRes);
+    
+            expect(mockRes.json).toHaveBeenCalledWith(mockUpdatedOrder);
+        }
+    });
+    
   
     it('should successfully update order status', async () => {
         const mockUpdatedOrder = {
@@ -144,8 +169,8 @@ describe("Order Status Update and Tracking", () => {
     it("should handle errors during status update", async () => {
         const mockError = new Error("Database error");
         
-        orderModel.findById.mockResolvedValue({ _id: "123", status: "Pending" }); // Order exists
-        orderModel.findByIdAndUpdate.mockRejectedValue(mockError); // Simulate DB error
+        orderModel.findById.mockResolvedValue({ _id: "123", status: "Pending" }); 
+        orderModel.findByIdAndUpdate.mockRejectedValue(mockError);
         
         await orderStatusController(mockReq, mockRes);
         
@@ -153,7 +178,7 @@ describe("Order Status Update and Tracking", () => {
         expect(mockRes.send).toHaveBeenCalledWith({
             success: false,
             message: "Error While Updating Order",
-            error: mockError, // Make sure this matches the updated controller
+            error: mockError, 
         });
     });
 });
