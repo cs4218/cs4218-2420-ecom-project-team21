@@ -333,9 +333,14 @@ export const braintreeTokenController = async (req, res) => {
     gateway.clientToken.generate({}, function (err, response) {
       if (err) {
         res.status(500).send(err);
-      } else {
-        res.send(response);
       }
+      // Handle empty response case
+      if (!response || !response.clientToken) {
+        res.status(500).send({ error: "Invalid token response" });
+      }
+      
+      res.send(response);
+      
     });
   } catch (error) {
     console.log(error);
@@ -347,6 +352,16 @@ export const brainTreePaymentController = async (req, res) => {
   try {
     const { nonce, cart } = req.body;
     let total = 0;
+
+    if (!cart || cart.length === 0) {
+      return res.status(400).send(new Error("Cart is empty"));
+    }
+
+    // Check if user is authenticated
+    if (!req.user || !req.user._id) {
+      return res.status(401).send(new Error("User not authenticated"));
+    }
+
     cart.map((i) => {
       total += i.price;
     });
