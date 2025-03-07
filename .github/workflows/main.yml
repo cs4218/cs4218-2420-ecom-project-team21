@@ -28,4 +28,4 @@ jobs:
           npm install
 
       - name: Run Jests backend tests
-        run: npm test-backend
+        run: npm run test-backend
