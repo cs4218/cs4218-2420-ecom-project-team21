@@ -9,7 +9,6 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-//payment gateway
 var gateway = new braintree.BraintreeGateway({
     environment: braintree.Environment.Sandbox,
     merchantId: process.env.BRAINTREE_MERCHANT_ID,
@@ -17,13 +16,13 @@ var gateway = new braintree.BraintreeGateway({
     privateKey: process.env.BRAINTREE_PRIVATE_KEY,
 });
 
+// create product
 export const createProductController = async (req, res) => {
     try {
         const { name, description, price, category, quantity, shipping } =
             req.fields;
         const { photo } = req.files;
 
-        // Validation with more appropriate status codes (400 for bad request)
         if (!name) {
             return res.status(400).send({ error: "Name is required" });
         }
@@ -65,29 +64,26 @@ export const createProductController = async (req, res) => {
                 .send({ error: "Quantity must be a positive number" });
         }
 
-        // Create a new product object
         const product = new productModel({
             ...req.fields,
             slug: slugify(name),
         });
 
-        // Handle the photo if present
         if (photo) {
-            product.photo = product.photo || {}; // Ensure photo is initialized as an object
+            product.photo = product.photo || {};
             product.photo.data = fs.readFileSync(photo.path);
             product.photo.contentType = photo.type;
         }
 
-        // Save the product
         const savedProduct = await product.save();
 
-        // Send a success response
         res.status(201).send({
             success: true,
             message: "Product created successfully",
             products: savedProduct,
         });
     } catch (error) {
+        console.log(error);
         res.status(500).send({
             success: false,
             error,
@@ -96,7 +92,7 @@ export const createProductController = async (req, res) => {
     }
 };
 
-//get all products
+// get all products
 export const getProductController = async (req, res) => {
     try {
         const products = await productModel
@@ -120,10 +116,10 @@ export const getProductController = async (req, res) => {
         });
     }
 };
+
 // get single product
 export const getSingleProductController = async (req, res) => {
     try {
-        // Check if slug is provided
         if (!req.params.slug) {
             return res.status(400).send({
                 success: false,
@@ -136,21 +132,19 @@ export const getSingleProductController = async (req, res) => {
             .select("-photo")
             .populate("category");
 
-        // If product is not found
         if (!product) {
             return res.status(404).send({
                 success: false,
                 message: "Product not found",
             });
         }
-
         res.status(200).send({
             success: true,
             message: "Single Product Fetched",
             product,
         });
     } catch (error) {
-        // console.log(error);
+        console.log(error);
         res.status(500).send({
             success: false,
             message: "Error while getting single product",
@@ -158,27 +152,6 @@ export const getSingleProductController = async (req, res) => {
         });
     }
 };
-
-// export const getSingleProductController = async (req, res) => {
-//     try {
-//         const product = await productModel
-//             .findOne({ slug: req.params.slug })
-//             .select("-photo")
-//             .populate("category");
-//         res.status(200).send({
-//             success: true,
-//             message: "Single Product Fetched",
-//             product,
-//         });
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).send({
-//             success: false,
-//             message: "Eror while getting single product",
-//             error,
-//         });
-//     }
-// };
 
 // get photo
 export const productPhotoController = async (req, res) => {
@@ -200,7 +173,7 @@ export const productPhotoController = async (req, res) => {
     }
 };
 
-//delete controller
+// delete controller
 export const deleteProductController = async (req, res) => {
     try {
         if (!req.params.pid) {
@@ -221,7 +194,7 @@ export const deleteProductController = async (req, res) => {
             message: "Product Deleted successfully",
         });
     } catch (error) {
-        // console.log(error);
+        console.log(error);
         res.status(500).send({
             success: false,
             message: "Error while deleting product",
@@ -230,98 +203,12 @@ export const deleteProductController = async (req, res) => {
     }
 };
 
-//upate producta
-// export const updateProductController = async (req, res) => {
-//     try {
-//         const { id } = req.params; // Get product ID from URL params
-//         const { name, description, price, category, quantity, shipping } =
-//             req.fields;
-//         const { photo } = req.files;
-
-//         // Validation
-//         switch (true) {
-//             case !name:
-//                 return res.status(400).send({ error: "Name is required" });
-//             case !description:
-//                 return res
-//                     .status(400)
-//                     .send({ error: "Description is required" });
-//             case !price:
-//                 return res.status(400).send({ error: "Price is required" });
-//             case !category:
-//                 return res.status(400).send({ error: "Category is required" });
-//             case !quantity:
-//                 return res.status(400).send({ error: "Quantity is required" });
-//             case photo && photo.size > 1000000: // Check if the photo exceeds 1MB
-//                 return res.status(400).send({
-//                     error: "Photo should be less than 1MB",
-//                 });
-//             case isNaN(price):
-//                 return res
-//                     .status(400)
-//                     .send({ error: "Price must be a valid number" });
-//             case price <= 0:
-//                 return res
-//                     .status(400)
-//                     .send({ error: "Price must be a positive number" });
-//             case isNaN(quantity):
-//                 return res
-//                     .status(400)
-//                     .send({ error: "Quantity must be a valid number" });
-//             case quantity <= 0:
-//                 return res
-//                     .status(400)
-//                     .send({ error: "Quantity must be a positive number" });
-//         }
-
-//         // Find the product by ID and update
-//         const updatedProduct = await productModel.findByIdAndUpdate(
-//             id, // Product ID from URL params
-//             {
-//                 name,
-//                 description,
-//                 price,
-//                 category,
-//                 quantity,
-//                 shipping,
-//                 slug: slugify(name), // Generate slug from the name
-//                 ...(photo && {
-//                     // If there's a photo, add it to the update object
-//                     photo: {
-//                         data: fs.readFileSync(photo.path), // Save the photo data
-//                         contentType: photo.type, // Save the photo content type
-//                     },
-//                 }),
-//             },
-//             { new: true } // Return the updated product
-//         );
-
-//         // If the product doesn't exist, return a 404 error
-//         if (!updatedProduct) {
-//             return res.status(404).send({ error: "Product not found" });
-//         }
-
-//         // Send success response
-//         res.status(200).send({
-//             success: true,
-//             message: "Product updated successfully",
-//             products: updatedProduct, // Return the updated product
-//         });
-//     } catch (error) {
-//         console.error(error); // Log the error details
-//         res.status(500).send({
-//             success: false,
-//             message: "Error in updating product",
-//         });
-//     }
-// };
-
+// update product
 export const updateProductController = async (req, res) => {
     try {
         const { name, description, price, category, quantity, shipping } =
             req.fields;
         const { photo } = req.files;
-        //alidation
         switch (true) {
             case !name:
                 return res.status(400).send({ error: "Name is required" });
@@ -331,11 +218,11 @@ export const updateProductController = async (req, res) => {
                     .send({ error: "Description is required" });
             case !price:
                 return res.status(400).send({ error: "Price is required" });
-            case isNaN(price): // Check if price is not a valid number
+            case isNaN(price):
                 return res
                     .status(400)
                     .send({ error: "Price must be a valid number" });
-            case price <= 0: // Check if price is a non-positive number
+            case price <= 0:
                 return res
                     .status(400)
                     .send({ error: "Price must be a positive number" });
@@ -343,11 +230,11 @@ export const updateProductController = async (req, res) => {
                 return res.status(400).send({ error: "Category is required" });
             case !quantity:
                 return res.status(400).send({ error: "Quantity is required" });
-            case isNaN(quantity): // Check if quantity is not a valid number
+            case isNaN(quantity):
                 return res
                     .status(400)
                     .send({ error: "Quantity must be a valid number" });
-            case quantity <= 0: // Check if quantity is a non-positive number
+            case quantity <= 0:
                 return res
                     .status(400)
                     .send({ error: "Quantity must be a positive number" });
