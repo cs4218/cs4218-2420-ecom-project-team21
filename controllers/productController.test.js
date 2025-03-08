@@ -21,8 +21,8 @@ jest.mock("braintree", () => ({
         },
     })),
     Environment: {
-        Sandbox: "sandbox", // Mocking the environment value
-        Production: "production", // You can add more as needed
+        Sandbox: "sandbox",
+        Production: "production",
     },
 }));
 
@@ -98,7 +98,7 @@ describe("Product Controller Tests", () => {
 
         // Missing Product ID: Should return 400 when slug is missing
         test("should return 400 when slug is missing", async () => {
-            req.params = {}; // Simulating missing slug
+            req.params = {};
 
             await getSingleProductController(req, res);
 
@@ -156,7 +156,6 @@ describe("Product Controller Tests", () => {
                 send: jest.fn(),
             };
 
-            // Mock fs.readFileSync to return a mock buffer
             fs.readFileSync.mockReturnValue(Buffer.from("mocked photo data"));
         });
 
@@ -171,17 +170,15 @@ describe("Product Controller Tests", () => {
                 shipping: "Shipping Info",
                 photo: {
                     contentType: "image/jpeg",
-                    data: Buffer.from("mocked photo data"), // Expecting mocked data
+                    data: Buffer.from("mocked photo data"),
                 },
-                slug: "test-product", // Assuming slug is generated based on the name
+                slug: "test-product",
             };
 
-            // Mock the productModel's save method to return the mockProduct object
             productModel.prototype.save = jest
                 .fn()
                 .mockResolvedValue(mockProduct);
 
-            // Initialize req and res
             req = {
                 fields: {
                     name: "Test Product",
@@ -205,10 +202,8 @@ describe("Product Controller Tests", () => {
                 send: jest.fn(),
             };
 
-            // Call the controller
             await createProductController(req, res);
 
-            // Mock the expected response structure
             expect(res.status).toHaveBeenCalledWith(201);
             expect(res.send).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -220,12 +215,12 @@ describe("Product Controller Tests", () => {
                         name: mockProduct.name,
                         photo: expect.objectContaining({
                             contentType: "image/jpeg",
-                            data: expect.any(Buffer), // Expecting photo data as a Buffer
+                            data: expect.any(Buffer),
                         }),
                         price: mockProduct.price,
                         quantity: mockProduct.quantity,
                         shipping: mockProduct.shipping,
-                        slug: mockProduct.slug, // Ensure that the slug is generated correctly
+                        slug: mockProduct.slug,
                     }),
                 })
             );
@@ -233,7 +228,7 @@ describe("Product Controller Tests", () => {
 
         // Missing Name: Should return error if name is missing
         test("should return error if name is missing", async () => {
-            req.fields.name = ""; // Simulate missing name
+            req.fields.name = "";
 
             await createProductController(req, res);
 
@@ -245,7 +240,7 @@ describe("Product Controller Tests", () => {
 
         // Missing Description: Should return error if description is missing
         test("should return error if description is missing", async () => {
-            req.fields.description = ""; // Simulate missing description
+            req.fields.description = "";
 
             await createProductController(req, res);
 
@@ -257,7 +252,7 @@ describe("Product Controller Tests", () => {
 
         // Missing Price: Should return error if price is missing
         test("should return error if price is missing", async () => {
-            req.fields.price = ""; // Simulate missing price
+            req.fields.price = "";
 
             await createProductController(req, res);
 
@@ -269,7 +264,7 @@ describe("Product Controller Tests", () => {
 
         // Invalid Price (NaN): Should return error if price is not a valid number
         test("should return error if price is not a valid number", async () => {
-            req.fields.price = "abc"; // Simulate non-numeric price
+            req.fields.price = "abc";
 
             await createProductController(req, res);
 
@@ -281,7 +276,7 @@ describe("Product Controller Tests", () => {
 
         // Negative Price: Should return error if price is negative
         test("should return error if price is negative", async () => {
-            req.fields.price = -5; // Simulate negative price
+            req.fields.price = -1;
 
             await createProductController(req, res);
 
@@ -293,7 +288,7 @@ describe("Product Controller Tests", () => {
 
         // Missing Category: Should return error if category is missing
         test("should return error if category is missing", async () => {
-            req.fields.category = ""; // Simulate missing category
+            req.fields.category = "";
 
             await createProductController(req, res);
 
@@ -305,7 +300,7 @@ describe("Product Controller Tests", () => {
 
         // Missing Quantity: Should return error if quantity is missing
         test("should return error if quantity is missing", async () => {
-            req.fields.quantity = ""; // Simulate missing quantity
+            req.fields.quantity = "";
 
             await createProductController(req, res);
 
@@ -317,7 +312,7 @@ describe("Product Controller Tests", () => {
 
         // Invalid Quantity (NaN): Should return error if quantity is not a valid number
         test("should return error if quantity is not a valid number", async () => {
-            req.fields.quantity = "xyz"; // Simulate non-numeric quantity
+            req.fields.quantity = "xyz";
 
             await createProductController(req, res);
 
@@ -329,7 +324,7 @@ describe("Product Controller Tests", () => {
 
         // Negative Quantity: Should return error if quantity is negative
         test("should return error if quantity is negative", async () => {
-            req.fields.quantity = -10; // Simulate negative quantity
+            req.fields.quantity = -1;
 
             await createProductController(req, res);
 
@@ -341,7 +336,7 @@ describe("Product Controller Tests", () => {
 
         // Photo Size Exceeds 1MB: Should return error if photo size exceeds 1MB
         test("should return error if photo size exceeds 1MB", async () => {
-            req.files.photo.size = 2000000; // Simulate photo size larger than 1MB
+            req.files.photo.size = 1000001;
 
             await createProductController(req, res);
 
@@ -353,16 +348,13 @@ describe("Product Controller Tests", () => {
 
         // Database Error: Should return error if there is a failure while saving the product
         test("should return error if there is a failure while saving the product", async () => {
-            // Simulate a database error by mocking products.save to throw an error
             const errorMessage = "Database error: Unable to save product.";
             jest.spyOn(productModel.prototype, "save").mockRejectedValue(
                 new Error(errorMessage)
             );
 
-            // Call the controller
             await createProductController(req, res);
 
-            // Check that the correct error message and status code are sent
             expect(res.status).toHaveBeenCalledWith(500);
             expect(res.send).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -382,19 +374,18 @@ describe("Product Controller Tests", () => {
             jest.clearAllMocks();
             req = {
                 params: {
-                    pid: "validProductId", // Simulate a valid product ID
+                    pid: "validProductId",
                 },
             };
 
             res = {
-                status: jest.fn().mockReturnThis(), // Mock status to return 'this' for chaining
-                send: jest.fn(), // Mock send method
+                status: jest.fn().mockReturnThis(),
+                send: jest.fn(),
             };
         });
 
         // Successful Product Deletion
         test("should delete a product successfully", async () => {
-            // Mock the findByIdAndDelete method to simulate successful deletion
             productModel.findByIdAndDelete = jest.fn().mockResolvedValue({
                 _id: "validProductId",
                 name: "Test Product",
@@ -402,7 +393,6 @@ describe("Product Controller Tests", () => {
 
             await deleteProductController(req, res);
 
-            // Assertions
             expect(productModel.findByIdAndDelete).toHaveBeenCalledWith(
                 "validProductId"
             );
@@ -415,12 +405,10 @@ describe("Product Controller Tests", () => {
 
         // Product Not Found
         test("should return 404 if product ID is invalid or does not exist", async () => {
-            // Mock the findByIdAndDelete method to simulate no product found
             productModel.findByIdAndDelete = jest.fn().mockResolvedValue(null);
 
             await deleteProductController(req, res);
 
-            // Assertions
             expect(productModel.findByIdAndDelete).toHaveBeenCalledWith(
                 "validProductId"
             );
@@ -433,11 +421,10 @@ describe("Product Controller Tests", () => {
 
         // No product ID provided: should return 400 with appropriate message
         test("should return 400 if no product ID is provided", async () => {
-            req = { params: {} }; // No product ID in request parameters
+            req = { params: {} };
 
             await deleteProductController(req, res);
 
-            // Check if response status and message are correct
             expect(res.status).toHaveBeenCalledWith(400);
             expect(res.send).toHaveBeenCalledWith({
                 success: false,
@@ -447,7 +434,6 @@ describe("Product Controller Tests", () => {
 
         // Database Error
         test("should return 500 if there is a database error", async () => {
-            // Mock the findByIdAndDelete method to simulate a database error
             productModel.findByIdAndDelete = jest
                 .fn()
                 .mockRejectedValue(new Error("Database error"));
@@ -489,7 +475,7 @@ describe("Product Controller Tests", () => {
                     },
                 },
                 params: {
-                    id: "product-id-123", // Assuming you are using product ID to update
+                    id: "product-id-123",
                 },
             };
 
@@ -498,14 +484,12 @@ describe("Product Controller Tests", () => {
                 send: jest.fn(),
             };
 
-            // Mock fs.readFileSync to return a mock buffer
             fs.readFileSync.mockReturnValue(Buffer.from("mocked photo data"));
         });
 
         // Successful Product Update
         test("should update product successfully", async () => {
             const mockProduct = {
-                // Simulated product data to return
                 _id: "123",
                 name: "Updated Product",
                 description: "Updated description",
@@ -517,28 +501,26 @@ describe("Product Controller Tests", () => {
                     data: null,
                     contentType: null,
                 },
-                save: jest.fn().mockResolvedValue(true), // Simulate save operation
+                save: jest.fn().mockResolvedValue(true),
             };
 
-            productModel.findByIdAndUpdate.mockResolvedValue(mockProduct); // Mock successful DB update
+            productModel.findByIdAndUpdate.mockResolvedValue(mockProduct);
 
-            // Mocking fs.readFileSync to return dummy data (photo)
             fs.readFileSync.mockReturnValue(Buffer.from("photo data"));
 
             await updateProductController(req, res);
 
-            // Assertions
-            expect(res.status).toHaveBeenCalledWith(201); // Check if status 201 was set
+            expect(res.status).toHaveBeenCalledWith(201);
             expect(res.send).toHaveBeenCalledWith({
                 success: true,
                 message: "Product updated successfully",
-                products: mockProduct, // Ensure the updated product is sent
+                products: mockProduct,
             });
         });
 
         // Missing Name: Should return error if name is missing
         test("should return error if name is missing", async () => {
-            req.fields.name = ""; // Simulate missing name
+            req.fields.name = "";
 
             await updateProductController(req, res);
 
@@ -550,7 +532,7 @@ describe("Product Controller Tests", () => {
 
         // Missing Description: Should return error if description is missing
         test("should return error if description is missing", async () => {
-            req.fields.description = ""; // Simulate missing description
+            req.fields.description = "";
 
             await updateProductController(req, res);
 
@@ -562,7 +544,7 @@ describe("Product Controller Tests", () => {
 
         // Missing Price: Should return error if price is missing
         test("should return error if price is missing", async () => {
-            req.fields.price = ""; // Simulate missing price
+            req.fields.price = "";
 
             await updateProductController(req, res);
 
@@ -574,7 +556,7 @@ describe("Product Controller Tests", () => {
 
         // Invalid Price (NaN): Should return error if price is not a valid number
         test("should return error if price is not a valid number", async () => {
-            req.fields.price = "abc"; // Simulate non-numeric price
+            req.fields.price = "abc";
 
             await updateProductController(req, res);
 
@@ -586,7 +568,7 @@ describe("Product Controller Tests", () => {
 
         // Negative Price: Should return error if price is negative
         test("should return error if price is negative", async () => {
-            req.fields.price = -5; // Simulate negative price
+            req.fields.price = -5;
 
             await updateProductController(req, res);
 
@@ -598,7 +580,7 @@ describe("Product Controller Tests", () => {
 
         // Missing Category: Should return error if category is missing
         test("should return error if category is missing", async () => {
-            req.fields.category = ""; // Simulate missing category
+            req.fields.category = "";
 
             await updateProductController(req, res);
 
@@ -610,7 +592,7 @@ describe("Product Controller Tests", () => {
 
         // Missing Quantity: Should return error if quantity is missing
         test("should return error if quantity is missing", async () => {
-            req.fields.quantity = ""; // Simulate missing quantity
+            req.fields.quantity = "";
 
             await updateProductController(req, res);
 
@@ -622,7 +604,7 @@ describe("Product Controller Tests", () => {
 
         // Invalid Quantity (NaN): Should return error if quantity is not a valid number
         test("should return error if quantity is not a valid number", async () => {
-            req.fields.quantity = "xyz"; // Simulate non-numeric quantity
+            req.fields.quantity = "xyz";
 
             await updateProductController(req, res);
 
@@ -634,7 +616,7 @@ describe("Product Controller Tests", () => {
 
         // Negative Quantity: Should return error if quantity is negative
         test("should return error if quantity is negative", async () => {
-            req.fields.quantity = -10; // Simulate negative quantity
+            req.fields.quantity = -10;
 
             await updateProductController(req, res);
 
@@ -646,7 +628,7 @@ describe("Product Controller Tests", () => {
 
         // Photo Size Exceeds 1MB: Should return error if photo size exceeds 1MB
         test("should return error if photo size exceeds 1MB", async () => {
-            req.files.photo.size = 2000000; // Simulate photo size larger than 1MB
+            req.files.photo.size = 2000000;
 
             await updateProductController(req, res);
 
@@ -658,13 +640,10 @@ describe("Product Controller Tests", () => {
 
         // Product Not Found: Should return 404 if product is not found
         test("should return 404 if product is not found", async () => {
-            // Mock findByIdAndUpdate to return null (indicating product not found)
             productModel.findByIdAndUpdate = jest.fn().mockResolvedValue(null);
 
-            // Call the controller
             await updateProductController(req, res);
 
-            // Check that the response contains a 404 error and the appropriate message
             expect(res.status).toHaveBeenCalledWith(404);
             expect(res.send).toHaveBeenCalledWith({
                 error: "Product not found",
@@ -673,32 +652,27 @@ describe("Product Controller Tests", () => {
 
         // Database Error: Should return error if there is a failure while updating the product
         test("should return error if there is a failure while updating the product", async () => {
-            // Mock findByIdAndUpdate to return a mock product (ensures 404 is not triggered)
             const mockProduct = { name: "Test Product", price: 100 };
             productModel.findByIdAndUpdate = jest
                 .fn()
                 .mockResolvedValue(mockProduct);
 
-            // Simulate a database error by mocking products.save to throw an error
             const errorMessage = "Database error: Unable to save product.";
             jest.spyOn(productModel.prototype, "save").mockRejectedValue(
                 new Error(errorMessage)
             );
 
-            // Mock the request and response objects
             const req = {
-                params: { id: "123" }, // Simulate product ID in the request
-                body: { name: "Updated Product", price: 150 }, // Simulate updated product data
+                params: { id: "123" },
+                body: { name: "Updated Product", price: 150 },
             };
             const res = {
                 status: jest.fn().mockReturnThis(),
                 send: jest.fn().mockReturnThis(),
             };
 
-            // Call the controller
             await updateProductController(req, res);
 
-            // Check that the correct error message and status code are sent
             expect(res.status).toHaveBeenCalledWith(500);
             expect(res.send).toHaveBeenCalledWith(
                 expect.objectContaining({
