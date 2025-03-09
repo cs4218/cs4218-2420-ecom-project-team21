@@ -231,6 +231,14 @@ export const updateProfileController = async (req, res) => {
 //orders
 export const getOrdersController = async (req, res) => {
   try {
+
+    if (!req.user) {
+      return res.status(401).send({
+        success: false,
+        message: "Unauthorized. Please login first.",
+      });
+    }
+    
     const orders = await orderModel
       .find({ buyer: req.user._id })
       .populate("products", "-photo")
@@ -240,7 +248,7 @@ export const getOrdersController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error WHile Geting Orders",
+      message: "Error While Getting Orders",
       error,
     });
   }
@@ -258,7 +266,7 @@ export const getAllOrdersController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error WHile Geting Orders",
+      message: "Error While Getting All Orders",
       error,
     });
   }
@@ -269,17 +277,26 @@ export const orderStatusController = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
+
     const orders = await orderModel.findByIdAndUpdate(
       orderId,
       { status },
       { new: true }
     );
+
+    if (!orders) {
+        res.status(404).send({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
     res.json(orders);
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error While Updateing Order",
+      message: "Error While Updating Order",
       error,
     });
   }
