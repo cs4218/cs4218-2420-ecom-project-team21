@@ -1,7 +1,7 @@
 import userModel from "../models/userModel.js";
 import orderModel from "../models/orderModel.js";
 
-import { comparePassword, hashPassword } from "./../helpers/authHelper.js";
+import { comparePassword, hashPassword, validateEmail, validatePhone, validatePassword } from "./../helpers/authHelper.js";
 import JWT from "jsonwebtoken";
 
 export const registerController = async (req, res) => {
@@ -25,6 +25,27 @@ export const registerController = async (req, res) => {
     }
     if (!answer) {
       return res.send({ message: "Answer is Required" });
+    }
+  
+    if (!validateEmail(email)) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid Email",
+      });
+    }
+    
+    if (!validatePhone(phone)) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid Phone Number",
+      });
+    }
+
+    if (!validatePassword(password)) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid password"
+      });
     }
     //check user
     const exisitingUser = await userModel.findOne({ email });
@@ -56,7 +77,7 @@ export const registerController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Errro in Registeration",
+      message: "Error in Registeration",
       error,
     });
   }
@@ -121,14 +142,22 @@ export const forgotPasswordController = async (req, res) => {
   try {
     const { email, answer, newPassword } = req.body;
     if (!email) {
-      res.status(400).send({ message: "Emai is required" });
+      return res.status(400).send({ message: "Email is required" });
     }
     if (!answer) {
-      res.status(400).send({ message: "answer is required" });
+      return res.status(400).send({ message: "answer is required" });
     }
     if (!newPassword) {
-      res.status(400).send({ message: "New Password is required" });
+      return res.status(400).send({ message: "New Password is required" });
     }
+
+    if (!validatePassword(newPassword)) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid password",
+      });
+    }
+  
     //check
     const user = await userModel.findOne({ email, answer });
     //validation
