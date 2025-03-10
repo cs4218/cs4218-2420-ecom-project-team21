@@ -4,7 +4,7 @@ import {
   updateCategoryController, 
   categoryController, 
   singleCategoryController, 
-  deleteCategoryCOntroller 
+  deleteCategoryController 
 } from "./categoryController";
 import categoryModel from "../models/categoryModel";
 import slugify from "slugify";
@@ -58,7 +58,7 @@ describe("Create Category Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: "Category Already Exisits",
+      message: "Category Already Exists",
     });
     expect(categoryModel.prototype.save).not.toHaveBeenCalled();
   });
@@ -109,7 +109,7 @@ describe("Create Category Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      error: undefined,
+      error: expect.any(Error),
       message: "Error in Category",
     });
     expect(categoryModel.prototype.save).toHaveBeenCalled();
@@ -275,7 +275,7 @@ describe("Single Category Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: "Get SIngle Category Successfully",
+      message: "Get Single Category Successfully",
       category
     });
   });
@@ -325,7 +325,7 @@ describe("Delete Category Controller Test", () => {
 
     categoryModel.findByIdAndDelete = jest.fn().mockResolvedValue({});
 
-    await deleteCategoryCOntroller(req, res);
+    await deleteCategoryController(req, res);
 
     expect(categoryModel.findByIdAndDelete).toHaveBeenCalledWith("categoryid");
     expect(res.status).toHaveBeenCalledWith(200);
