@@ -716,40 +716,6 @@ describe("Forgot Password Controller Test", () => {
       error: expect.any(Error),
     });
   });
-});
-
-describe("Test Controller Test", () => {
-  let req, res;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    res = {
-      status: jest.fn().mockReturnThis(),
-      send: jest.fn(),
-    };
-    req = {};
-  });
-
-  test("test success", async () => {
-    await testController(req, res);
-    expect(res.send).toHaveBeenCalledWith("Protected Routes");
-  });
-
-  test("test failed with error", async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    const error = new Error("Test failed");
-    res.send.mockImplementationOnce(() => {
-      throw error;
-    }).mockImplementationOnce((arg) => arg);
-
-    await testController(req, res);
-
-    expect(consoleSpy).toHaveBeenCalledWith(error);
-    
-    expect(res.send).toHaveBeenLastCalledWith({ error });
-
-    consoleSpy.mockRestore();
-  });
   
   test("new password is all numbers", async () => {
     req = {
@@ -841,5 +807,39 @@ describe("Test Controller Test", () => {
       success: false,
       message: "Invalid password",
     });
+  });
+});
+
+describe("Test Controller Test", () => {
+  let req, res;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+    req = {};
+  });
+
+  test("test success", async () => {
+    await testController(req, res);
+    expect(res.send).toHaveBeenCalledWith("Protected Routes");
+  });
+
+  test("test failed with error", async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const error = new Error("Test failed");
+    res.send.mockImplementationOnce(() => {
+      throw error;
+    }).mockImplementationOnce((arg) => arg);
+
+    await testController(req, res);
+
+    expect(consoleSpy).toHaveBeenCalledWith(error);
+    
+    expect(res.send).toHaveBeenLastCalledWith({ error });
+
+    consoleSpy.mockRestore();
   });
 });
