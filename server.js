@@ -12,7 +12,7 @@ import cors from "cors";
 dotenv.config();
 
 if (process.env.DEV_MODE !== "test") {
-    connectDB(); // Connect to MongoDB (skip in tests)
+    connectDB(); 
 }
 
 const app = express();
