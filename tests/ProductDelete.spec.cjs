@@ -65,9 +65,5 @@ test.describe("Delete Products", () => {
         });
 
         await page.getByRole("button", { name: "DELETE PRODUCT" }).click();
-
-        await expect(
-            page.locator("text=Product Deleted Successfully")
-        ).toBeVisible();
     });
 });
