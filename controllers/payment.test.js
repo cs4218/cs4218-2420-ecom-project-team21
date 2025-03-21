@@ -1,3 +1,4 @@
+import { describe } from 'node:test';
 import orderModel from '../models/orderModel';
 import {
   braintreeTokenController,
@@ -175,7 +176,10 @@ describe('brainTreePaymentController', () => {
     await brainTreePaymentController(request, response);
 
     expect(response.status).toHaveBeenCalledWith(400);
-    expect(response.send).toHaveBeenCalledWith(new Error('Cart is empty'));
+    expect(response.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Cart is Empty"
+    });
   });
 
   it('should handle unauthenticated user with 401 status', async () => {
@@ -197,4 +201,5 @@ describe('brainTreePaymentController', () => {
 
     expect(response.json).toHaveBeenCalledTimes(1);
   });
+
 });

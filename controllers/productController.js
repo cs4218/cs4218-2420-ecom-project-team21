@@ -431,13 +431,24 @@ export const brainTreePaymentController = async (req, res) => {
         const { nonce, cart } = req.body;
         let total = 0;
         if (!cart || cart.length === 0) {
-            return res.status(400).send(new Error("Cart is empty"));
-          }
+            return res.status(400).send({
+                success: false,
+                message: "Cart is Empty",
+              });
+        }
       
         // Check if user is authenticated
         if (!req.user || !req.user._id) {
-        return res.status(401).send(new Error("User not authenticated"));
+            return res.status(401).send(new Error("User not authenticated"));
         }
+
+        if (!nonce) {
+            return res.status(400).send({
+              success: false,
+              message: "Nonce is required",
+            });
+        }
+      
         
         cart.map((i) => {
             total += i.price;
@@ -457,6 +468,7 @@ export const brainTreePaymentController = async (req, res) => {
                         payment: result,
                         buyer: req.user._id,
                     }).save();
+                    
                     res.json({ ok: true });
                 } else {
                     res.status(500).send(error);

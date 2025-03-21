@@ -78,5 +78,12 @@ module.exports = {
   },
 };
 ```
+## Testing with Playwright
+UI tests are found under /tests folder.
+Ensure that mongodb is running with the test data given.
+To run, simply run:
+```sh
+npx playwright test tests 
+```
 # workflow URL
 https://github.com/cs4218/cs4218-2420-ecom-project-team21/actions
