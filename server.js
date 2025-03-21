@@ -11,8 +11,9 @@ import cors from "cors";
 // configure env
 dotenv.config();
 
-//database config
-connectDB();
+if (process.env.DEV_MODE !== "test") {
+    connectDB(); 
+}
 
 const app = express();
 
