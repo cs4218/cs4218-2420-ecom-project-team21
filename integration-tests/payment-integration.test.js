@@ -4,7 +4,6 @@ import request from "supertest";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 
-console.log(process.env.DEV_MODE);
 describe("Testing Payment Gateway Endpoints '/braintree/token' and '/braintree/payment'", () => {
   let mongoServer;
   const USERS = 
