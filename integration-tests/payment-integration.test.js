@@ -4,13 +4,13 @@ import request from "supertest";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 
-
+console.log(process.env.DEV_MODE);
 describe("Testing Payment Gateway Endpoints '/braintree/token' and '/braintree/payment'", () => {
   let mongoServer;
   const USERS = 
     {
       name: "CS 4218 Test Account",
-      email: "cs4219@test.com",
+      email: "cs4217@test.com",
       password: "$2b$10$//wWsN./fEX1WiipH57HG.SAwgkYv1MRrPSkpXM38Dy5seOEhCoUy",
       phone: "81234567",
       address: "1 Computing Drive",
@@ -59,10 +59,13 @@ describe("Testing Payment Gateway Endpoints '/braintree/token' and '/braintree/p
 
   beforeAll(async () => {
       if (mongoose.connection.readyState === 0) {
-        mongoServer = await MongoMemoryServer.create();
-        await mongoose.connect(mongoServer.getUri(), {dbName: "cs4218"});
+        const mongoServer = await MongoMemoryServer.create();
+        const mongoUri = mongoServer.getUri();
+        await mongoose.connect(mongoUri, {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+        });
       }
-      await mongoose.connection.collection("users").deleteMany({});
       
       // Insert mock data into in-memory database
       await mongoose.connection.collection("users").insertOne(USERS);
@@ -72,6 +75,8 @@ describe("Testing Payment Gateway Endpoints '/braintree/token' and '/braintree/p
   
     afterAll(async () => {
       await mongoose.disconnect();
+      await mongoose.connection.close();
+      server.close();
     });
 
   describe("Integration tests for authenticated user", () => {
@@ -80,7 +85,7 @@ describe("Testing Payment Gateway Endpoints '/braintree/token' and '/braintree/p
     beforeAll(async () => {
       const loginRes = await request(app)
         .post("/api/v1/auth/login")
-        .send({ email: "cs4219@test.com", password: "cs4218@test.com" });
+        .send({ email: "cs4217@test.com", password: "cs4218@test.com" });
       token = loginRes.body.token;
     });
 
