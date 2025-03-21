@@ -43,6 +43,16 @@ To run tests for backend files, use the following command:
 npm run test-backend
 ```
 
+To run tests for Frontend files, use the following command:
+```sh
+npm run test-frontend
+```
+
+To run integration tests, use the following command:
+```sh
+npm run test-integration
+```
+
 ## Jest Configuration
 
 Update the `jest.backend.config.js` file in the root of your project to customize Jest configuration:
@@ -80,10 +90,10 @@ module.exports = {
 ```
 ## Testing with Playwright
 UI tests are found under /tests folder.
-Ensure that mongodb is running with the test data given.
-To run, simply run:
+1. Ensure that mongodb is running with the test data given.
+2. To run playwright tests, simply run:
 ```sh
-npx playwright test tests 
+npx playwright test
 ```
 # workflow URL
 https://github.com/cs4218/cs4218-2420-ecom-project-team21/actions
