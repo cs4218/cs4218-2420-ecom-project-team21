@@ -18,10 +18,8 @@ export const requireSignIn = async (req, res, next) => {
         next();
     } catch (error) {
         console.log(error);
-        // immediately return the error status code
         res.status(401).send({
             success: false,
-            error,
             message: "Error in requireSignIn middleware",
         });
     }
