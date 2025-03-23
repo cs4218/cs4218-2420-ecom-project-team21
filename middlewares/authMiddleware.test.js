@@ -14,7 +14,10 @@ describe('requireSignIn middleware', () => {
         authorization: 'Bearer token123'
       }
     };
-    res = {};
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn()
+    };
     next = jest.fn();
     console.log = jest.fn();
     process.env.JWT_SECRET = 'testsecret';
