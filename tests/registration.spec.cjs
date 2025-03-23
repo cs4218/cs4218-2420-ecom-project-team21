@@ -227,5 +227,4 @@ test.describe("Registration Page", () => {
             console.log('error');
         }
     });
-    
 });
