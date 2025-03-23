@@ -1,0 +1,36 @@
+import { test, expect } from '@playwright/test';
+
+test('E2E payment page test', async ({ page }) => {
+  await page.goto('http://localhost:3000/');
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByRole('textbox', { name: 'Enter Your Email' }).click();
+  await page.getByRole('textbox', { name: 'Enter Your Email' }).fill('cs4218@test.com');
+  await page.getByRole('textbox', { name: 'Enter Your Password' }).click();
+  await page.getByRole('textbox', { name: 'Enter Your Password' }).fill('cs4218@test.com');
+  await page.getByRole('button', { name: 'LOGIN' }).click();
+  await expect(page.getByText('login successfully')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'CS 4218 Test Account' })).toBeVisible();
+  await page.locator('div:nth-child(2) > .card-body > div:nth-child(3) > button:nth-child(2)').click();
+  await page.locator('div:nth-child(4) > .card-body > div:nth-child(3) > button:nth-child(2)').click();
+  await expect(page.getByTitle('2')).toBeVisible();
+  await page.getByRole('button', { name: 'CS 4218 Test Account' }).click();
+  await page.getByRole('link', { name: 'Cart' }).click();
+  await expect(page.getByRole('heading', { name: 'Hello CS 4218 Test Account' })).toBeVisible();
+  await expect(page.getByRole('img', { name: 'The Law of Contract in' })).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Smartphone' })).toBeVisible();
+  await expect(page.getByRole('main')).toContainText('The Law of Contract in Singapore');
+  await expect(page.getByRole('main')).toContainText('A bestselling book in Singapor');
+  await expect(page.getByRole('main')).toContainText('Price : 54.99');
+  await expect(page.getByRole('main')).toContainText('Smartphone');
+  await expect(page.getByRole('main')).toContainText('A high-end smartphone');
+  await expect(page.getByRole('main')).toContainText('Price : 999.99');
+  await expect(page.getByRole('button', { name: 'Remove' }).first()).toBeVisible();
+  await expect(page.locator('div').filter({ hasText: /^SmartphoneA high-end smartphonePrice : 999\.99Remove$/ }).getByRole('button')).toBeVisible();
+  await expect(page.getByRole('main')).toContainText('Total : $1,054.98');
+  await expect(page.locator('h5')).toContainText('1 Computing Drive');
+  await expect(page.getByText('Edit Choose a way to pay')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Make Payment' })).toBeVisible();
+  await page.getByRole('button', { name: 'Remove' }).first().click();
+  await expect(page.locator('h1')).toContainText('You Have 1 items in your cart');
+  await expect(page.getByRole('main')).toContainText('Total : $999.99');
+});
