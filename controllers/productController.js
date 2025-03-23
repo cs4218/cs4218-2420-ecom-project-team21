@@ -249,7 +249,9 @@ export const updateProductController = async (req, res) => {
             { ...req.fields, slug: slugify(name) },
             { new: true }
         );
-        if (!products) res.status(404).send({ error: "Product not found" });
+        if (!products) {
+            return res.status(404).send({ error: "Product not found" });
+        }
         if (photo) {
             products.photo.data = fs.readFileSync(photo.path);
             products.photo.contentType = photo.type;
@@ -413,8 +415,8 @@ export const braintreeTokenController = async (req, res) => {
         gateway.clientToken.generate({}, function (err, response) {
             if (err) {
                 res.status(500).send(err);
-            } 
-                // Handle empty response case
+            }
+            // Handle empty response case
             if (!response || !response.clientToken) {
                 res.status(500).send({ error: "Invalid token response" });
             }
@@ -434,9 +436,9 @@ export const brainTreePaymentController = async (req, res) => {
             return res.status(400).send({
                 success: false,
                 message: "Cart is Empty",
-              });
+            });
         }
-      
+
         // Check if user is authenticated
         if (!req.user || !req.user._id) {
             return res.status(401).send(new Error("User not authenticated"));
@@ -444,12 +446,11 @@ export const brainTreePaymentController = async (req, res) => {
 
         if (!nonce) {
             return res.status(400).send({
-              success: false,
-              message: "Nonce is required",
+                success: false,
+                message: "Nonce is required",
             });
         }
-      
-        
+
         cart.map((i) => {
             total += i.price;
         });
@@ -468,7 +469,7 @@ export const brainTreePaymentController = async (req, res) => {
                         payment: result,
                         buyer: req.user._id,
                     }).save();
-                    
+
                     res.json({ ok: true });
                 } else {
                     res.status(500).send(error);
